@@ -1,8 +1,4 @@
-
-```toc
-```
-
-## How to present to business
+# How to present to business
 
 ### Key Indications - Prelude(Feedback)
 - Prepare who is presenting what
