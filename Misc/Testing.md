@@ -10,7 +10,7 @@
 
 ## AutoFixture and AutoMoq
 
-```c#
+```csharp
  public async Task ESReport_Given_Identifier_When_GetLatestEsReportForCustomer_Then_Return_ESReport(
             IFixture fixture,
             [Frozen] Mock<IEsReportService> esReportServiceMock,
