@@ -1,11 +1,4 @@
-
-```toc
-```
-
-
-## Builder
-
-### Setup
+## Setup
 
 #### Base Interface
 - Defines With methods and main method for execution
@@ -161,7 +154,7 @@ private static void SetupServices(IServiceCollection services)
 }
 ```
 
-### Implementation
+## Implementation
 - Where the method is called
 
 - Interface

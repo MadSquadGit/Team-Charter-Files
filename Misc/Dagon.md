@@ -1,7 +1,3 @@
-```toc
-```
-
-
 ## Add new variables for dotnet
 
 ### Steps

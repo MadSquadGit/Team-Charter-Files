@@ -1,8 +1,4 @@
-```toc
-```
 
-
-## Fix for Abstract Control to Form Control Issue
 
 - Prevents issue on Casting here. 
 - Alternative is $any(control) _this doesn't work with strict templating_
