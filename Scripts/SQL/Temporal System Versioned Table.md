@@ -16,7 +16,7 @@ GO
 
 --Add Temporal Table
 ALTER TABLE 
-  [ESnR].[Summary] 
+  [Schema].[Summary] 
 SET 
   (
     SYSTEM_VERSIONING = ON (HISTORY_TABLE = History.Summary)
