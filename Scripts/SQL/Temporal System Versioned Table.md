@@ -3,7 +3,7 @@
 ```sql
 --Original Table
 ALTER TABLE 
-  [ESnR].[Summary] 
+  [Schema].[Summary] 
 ADD 
   [VersionStartTime] [DATETIME2](7) GENERATED ALWAYS AS ROW START HIDDEN CONSTRAINT [DF_Summary_VersionStartTime] DEFAULT SYSUTCDATETIME(), 
   [VersionEndTime] [DATETIME2](7) GENERATED ALWAYS AS ROW END HIDDEN CONSTRAINT [DF_Summary_VersionEndTime] DEFAULT CONVERT(
