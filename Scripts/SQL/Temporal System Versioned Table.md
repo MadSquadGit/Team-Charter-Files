@@ -26,6 +26,6 @@ SET
 ## Undo Table
 - This converts a temporal table to a normal table to be deleted
 ```sql
-ALTER TABLE ESNR.AssesssmentSummary SET (SYSTEM_VERSIONING = ON);
-ALTER TABLE ESNR.AssesssmentSummary ADD PERIOD FOR SYSTEM_TIME;
+ALTER TABLE Schema.Summary SET (SYSTEM_VERSIONING = ON);
+ALTER TABLE Schema.Summary ADD PERIOD FOR SYSTEM_TIME;
 ```

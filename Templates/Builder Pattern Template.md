@@ -7,7 +7,7 @@
 ```c#
 public interface IWorkflowChangeFluentService
 {
-	IWorkflowChangeFluentService WithAssessmentId(int id);
+	IWorkflowChangeFluentService WithId(int id);
 	IWorkflowChangeFluentService WithTemplateNode(TemplateNode node);
 	IWorkflowChangeFluentService WithLoggedInUser(string loggedInUser);
 	IWorkflowChangeFluentService WithTargetStatus(string targetStatus = null);
@@ -22,7 +22,7 @@ public interface IWorkflowChangeFluentService
 - This creates a specific iteration of the Base Builder
 - Example
 ```c#
-public interface IReturnAssessmentFluentService : IWorkflowChangeFluentService {}
+public interface IReturnFluentService : IWorkflowChangeFluentService {}
 ```
 
 
@@ -31,14 +31,14 @@ public interface IReturnAssessmentFluentService : IWorkflowChangeFluentService {
 - This ios where teh logic for teh With methods and teh execute method/s will be places that is specific to this flow
 - Example
 ```c#
-public class ReturnAssessmentFluentService : IReturnAssessmentFluentService
+public class ReturnFluentService : IReturnFluentService
 {
-	private readonly IAssessmentRepository _assessmentRepository;
-	private readonly IAssessmentService _assessmentService;
+	private readonly IRepository _Repository;
+	private readonly IService _Service;
 	private readonly IWorkflowUserRoleService _userRoleService;
 	private readonly IEmailNotificationService _emailNotificationService;
 
-	private int _assessmentId;
+	private int _Id;
 	private string _loggedInUser;
 	private string _targetStatus;
 	private bool _isAdmin;
@@ -46,21 +46,21 @@ public class ReturnAssessmentFluentService : IReturnAssessmentFluentService
 	private List<UserRoleEnum> _userRoles;
 	private List<UserRoleEnum> _emailRecipients;
 
-	public ReturnAssessmentFluentService(
-		IAssessmentRepository assessmentRepository,
-		IAssessmentService assessmentService,
+	public ReturnFluentService(
+		IRepository Repository,
+		IService Service,
 		IWorkflowUserRoleService userRoleService,
 		IEmailNotificationService emailNotificationService)
 	{
-		_assessmentRepository = assessmentRepository;
-		_assessmentService = assessmentService;
+		_Repository = Repository;
+		_Service = Service;
 		_userRoleService = userRoleService;
 		_emailNotificationService = emailNotificationService;
 	}
 
-	public IWorkflowChangeFluentService WithAssessmentId(int id)
+	public IWorkflowChangeFluentService WithId(int id)
 	{
-		_assessmentId = id;
+		_Id = id;
 		return this;
 	}
 
@@ -98,45 +98,45 @@ public class ReturnAssessmentFluentService : IReturnAssessmentFluentService
 
 	public TemplateNode ExecuteWorkflow()
 	{
-		Assessment originalAssessment = _assessmentService.GetAssessmentById(_assessmentId);
+		 original = _Service.GetById(_Id);
 
-		if (originalAssessment == null)
+		if (original == null)
 		{
-			throw new KeyNotFoundException($"Assessment with Id {_assessmentId} does not exist.");
+			throw new KeyNotFoundException($" with Id {_Id} does not exist.");
 		}
 
-		if (!_userRoleService.UserHasRoles(originalAssessment, _loggedInUser, _userRoles) && !_isAdmin)
+		if (!_userRoleService.UserHasRoles(original, _loggedInUser, _userRoles) && !_isAdmin)
 		{
 			throw new InvalidOperationException($"{_loggedInUser} does not have the valid role to perform this action");
 		}
 
-		if (_targetStatus == originalAssessment.StatusCode)
+		if (_targetStatus == original.StatusCode)
 		{
-			throw new InvalidOperationException($"The assessment is already set to the requested status");
+			throw new InvalidOperationException($"The  is already set to the requested status");
 		}
 
 		if (_targetStatus == Status.ReturnedByEnsTeam)
 		{
-			_assessmentService.ResetAnsweredNode(_templateNode);
+			_Service.ResetAnsweredNode(_templateNode);
 		}
 
-		_assessmentRepository.UpdateAssessment(
-			_assessmentId,
-			originalAssessment.StatusCode,
+		_Repository.Update(
+			_Id,
+			original.StatusCode,
 			_targetStatus,
 			_loggedInUser);
 
 
-		Assessment returnedAssessment = _assessmentService.GetAssessmentById(_assessmentId, true, true);
+		 returned = _Service.GetById(_Id, true, true);
 
 		// Send Emails
-		List<string> recipients = _emailNotificationService.GetEmailRecipients(returnedAssessment, _emailRecipients);
+		List<string> recipients = _emailNotificationService.GetEmailRecipients(returned, _emailRecipients);
 
-		_emailNotificationService.SendAssessmentEmailAsync(returnedAssessment, recipients)
+		_emailNotificationService.SendEmailAsync(returned, recipients)
 			.GetAwaiter()
 			.GetResult();
 
-		return _assessmentService.GetAssessmentTemplateById(returnedAssessment);
+		return _Service.GetTemplateById(returned);
 	}
 }
 ```
@@ -150,7 +150,7 @@ public class ReturnAssessmentFluentService : IReturnAssessmentFluentService
 ```cs
 private static void SetupServices(IServiceCollection services)
 {
- services.AddTransient<IReturnAssessmentFluentService, ReturnAssessmentFluentService>();
+ services.AddTransient<IReturnFluentService, ReturnFluentService>();
 }
 ```
 
@@ -159,33 +159,33 @@ private static void SetupServices(IServiceCollection services)
 
 - Interface
 ```c#
-public interface IAssessmentWorkflowService
+public interface IWorkflowService
 {
-TemplateNode ReturnAssessmentToCreditManager(int id, TemplateNode node, bool isAdmin);
+TemplateNode ReturnToCreditManager(int id, TemplateNode node, bool isAdmin);
 }
 ```
 
 - Class
 ```c#
-public class AssessmentWorkflowService : IAssessmentWorkflowService
+public class WorkflowService : IWorkflowService
 {
-	private readonly IReturnAssessmentFluentService _returnAssessmentFluentService;
+	private readonly IReturnFluentService _returnFluentService;
 
-	public AssessmentWorkflowService(
-		IReturnAssessmentFluentService returnAssessmentFluentService)
+	public WorkflowService(
+		IReturnFluentService returnFluentService)
 	{
-		_returnAssessmentFluentService = returnAssessmentFluentService;
+		_returnFluentService = returnFluentService;
 	}
 
-	public TemplateNode ReturnAssessmentToCreditManager(int id, TemplateNode node, bool isAdmin)
+	public TemplateNode ReturnToCreditManager(int id, TemplateNode node, bool isAdmin)
 	{
-		return _returnAssessmentFluentService
-				.WithAssessmentId(id)
+		return _returnFluentService
+				.WithId(id)
 				.WithTargetStatus(Status.ReturnedByEnsTeam)
 				.WithLoggedInUser(_loggedInUser)
 				.WithApplicableUserRoles(new List<UserRoleEnum> { UserRoleEnum.EnSTeam }, isAdmin)
 				.WithTemplateNode(node)
-				.WithEmailRecipients(new List<UserRoleEnum> { UserRoleEnum.CountryRepresentative, UserRoleEnum.EnSTeam, UserRoleEnum.AssessmentCreator })
+				.WithEmailRecipients(new List<UserRoleEnum> { UserRoleEnum.CountryRepresentative, UserRoleEnum.EnSTeam, UserRoleEnum.Creator })
 				.ExecuteWorkflow();
 	}
 }

@@ -11,30 +11,30 @@
 ## AutoFixture and AutoMoq
 
 ```csharp
- public async Task ESReport_Given_Identifier_When_GetLatestEsReportForCustomer_Then_Return_ESReport(
+ public async Task given_when(
             IFixture fixture,
-            [Frozen] Mock<IEsReportService> esReportServiceMock,
-            [Frozen] Mock<IAssessmentService> assessmentServiceMock)
+            [Frozen] Mock<IService> eserviceMock,
+            [Frozen] Mock<IAService> aServiceMock)
         {
             fixture.Customize(new AutoMoqCustomization());
 
             var staticServiceMock = new Mock<IStaticService>();
-            var assessmentSummaryServiceMock = new Mock<IAssessmentSummaryService>();
+            var aSummaryServiceMock = new Mock<IASummaryService>();
 
             fixture.Inject(staticServiceMock.Object);
-            fixture.Inject(assessmentSummaryServiceMock.Object);
+            fixture.Inject(aSummaryServiceMock.Object);
 
-            staticServiceMock.Setup(x => x.GetSectionInputTypes()).Returns(FakeSectionInput.GetInputTypesFake());
-            esReportServiceMock.Setup(x => x.GetReportByAssessmentId(It.IsAny<int>())).ReturnsAsync(FakeEsReport.GetEsReportFake());
-            assessmentSummaryServiceMock.Setup(x => x.ListByAssessmentId(It.IsAny<int>())).ReturnsAsync(FakeAssessmentSummary.GetAssessmentSummariesFake());
-            assessmentServiceMock.Setup(x => x.GetLatestAssessmentByCustomerIdentifier(It.IsAny<string>())).Returns(FakeAssessment.GetExistingCompletedFakeAssessment());
+            staticServiceMock.Setup(x => x.GetInputTypes()).Returns(FakeSectionInput.GetInputTypesFake());
+            serviceMock.Setup(x => x.GetById(It.IsAny<int>())).ReturnsAsync(FakeReport.GetReportFake());
+            aSummaryServiceMock.Setup(x => x.ListById(It.IsAny<int>())).ReturnsAsync(FakeASummary.GetSummariesFake());
+            aServiceMock.Setup(x => x.GetLatestByIdentifier(It.IsAny<string>())).Returns(FakeAssessment.GetExistingCompletedFake());
 
             var resultsService = fixture.Create<ResultsService>();
 
-            var response = await resultsService.GetLatestEsReportForCustomer("001TestCustomerCode");
+            var response = await resultsService.GetLatestReportForCustomer("001TestCustomerCode");
 
             Assert.NotNull(response.Data);
-            Assert.IsType<EsReport>(response.Data);
+            Assert.IsType<Report>(response.Data);
             Assert.Equal("Content", response.Data.Conclusion);
         }
 ```
